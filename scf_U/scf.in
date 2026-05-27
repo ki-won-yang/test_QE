@@ -1,0 +1,28 @@
+&control
+    calculation = 'scf'
+    prefix = 'MoS2'
+    pseudo_dir = '../pseudo/'
+    outdir = '../tmp2/'
+/
+&system
+    ibrav = 0, nat = 3, ntyp = 2,
+    ecutwfc = 60.0,
+    occupations = 'smearing', smearing = 'gaussian', degauss = 0.005
+/
+&electrons
+    conv_thr = 1.0d-8
+/
+ATOMIC_SPECIES
+Mo 95.95  Mo.pbe-n-nc.UPF
+S 32.065  S.pbe-n-nc.UPF
+CELL_PARAMETERS (angstrom)
+   1.5921519154827339    2.7576880109842050    0.0000000000000000
+   3.1843038309654679    0.0000000000000000    0.0000000000000000
+   1.5921519154827339    0.9192293369947351   -6.4820983796053611
+ATOMIC_POSITIONS (crystal)
+Mo   0.9997750399999998    0.9997750399999994    0.0006748800000007
+S   0.4129302199999997    0.4129302199999994    0.7612093400000010 
+S   0.2532957399999997    0.2532957399999994    0.2401127800000009 
+
+K_POINTS {automatic}
+  6 6 3 0 0 0

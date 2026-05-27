@@ -1,0 +1,30 @@
+&control
+    calculation = 'relax'
+    prefix = 'graphene'
+    pseudo_dir = '../pseudo/'
+    outdir = './tmp/'
+    tstress = .true.
+    forc_conv_thr = 1.0d-8
+/
+&system
+    ibrav = 0, nat = 2, ntyp = 1,
+    ecutwfc = 50.0,
+    occupations = 'smearing', smearing = 'gaussian', degauss = 0.01
+/
+&electrons
+    conv_thr = 1.0d-8
+/
+&ions
+    ion_dynamics = 'damp'
+/
+ATOMIC_SPECIES
+  C  12.011  C_ONCV_PBE_sr.upf
+CELL_PARAMETERS (angstrom)
+   2.446431890   0.000000000   0.000000000
+  -1.230000000   2.116722616   0.000000000
+   0.000000000   0.000000000  10.000000000
+ATOMIC_POSITIONS (crystal)
+C               -0.0000280595        0.0000123354        0.0000000011
+C                0.3333610595        0.6666546646       -0.0000000011
+K_POINTS {automatic}
+  9 9 1 0 0 0
