@@ -45,21 +45,22 @@ qe_tutorial/
 
 ---
 
-## 0. 사전 준비
+## 0. 실습 자료 다운로드 및 환경 준비
 
-zip 파일 압축 해제 후 시작합니다.
-
-```bash
-python3 -m zipfile -e QE_vs_code.zip .
-```
-
-파이썬 라이브러리 설치 및 슈도포텐셜을 다운로드합니다.
+가장 먼저 실습에 필요한 모든 코드와 데이터를 GitHub에서 다운로드합니다.
+터미널을 열고 아래 명령어를 순서대로 입력하세요.
 
 ```bash
-# 파이썬 라이브러리 설치
+# 1. 실습 자료(GitHub 저장소) 다운로드
+git clone [https://github.com/ki-won-yang/test_QE.git](https://github.com/ki-won-yang/test_QE.git)
+
+# 2. 다운로드한 실습 폴더로 이동 (매우 중요!)
+cd test_QE
+
+# 3. 파이썬 라이브러리 설치
 pip install -r 0_setup/requirements.txt
 
-# 슈도포텐셜 다운로드 (pseudo/ 폴더에 저장됨)
+# 4. 슈도포텐셜 다운로드 (pseudo/ 폴더에 저장됨)
 bash 0_setup/setup_pseudo.sh
 ```
 
