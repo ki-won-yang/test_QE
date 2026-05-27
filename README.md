@@ -52,7 +52,7 @@ qe_tutorial/
 
 ```bash
 # 1. 실습 자료(GitHub 저장소) 다운로드
-git clone [https://github.com/ki-won-yang/test_QE.git](https://github.com/ki-won-yang/test_QE.git)
+git clone https://github.com/ki-won-yang/test_QE.git
 
 # 2. 다운로드한 실습 폴더로 이동 (매우 중요!)
 cd test_QE
