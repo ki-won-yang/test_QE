@@ -1,218 +1,408 @@
-# Quantum ESPRESSO 실습 가이드: Graphene 전자구조 계산
+# Quantum ESPRESSO 실습 가이드
 
-## 🎯 학습 목표
-
-- Quantum ESPRESSO(QE) 7.5를 Conda를 통해 설치하고 `pw.x`를 구동할 수 있다.
-- Graphene에 대해 SCF, Band structure, DOS/PDOS 계산을 수행할 수 있다.
-- 파이썬을 활용해 계산 결과를 시각화하고 물리적 의미를 해석할 수 있다.
+이 문서는 EDISON 실습 폴더에서 Quantum ESPRESSO(QE)를 이용해 구조 최적화, SCF, band structure, DOS/PDOS, Hubbard U 테스트를 실행하는 과정을 정리한 가이드입니다.
 
 ---
 
-## 📁 프로젝트 구조
+## 프로젝트 구조
 
-```
-qe_tutorial/
-├── Tutorial.md              ← 지금 보고 있는 문서
-├── pseudo/                  ← [공유] 슈도포텐셜 (전 실습 공통)
-│   └── C_ONCV_PBE_sr.upf
-├── tmp/                     ← [공유] 계산 결과 (SCF → Band, DOS 순으로 공유)
-│
-├── 0_setup/                 ← 환경 준비
-│   ├── install_qe7.4.sh     ← Miniconda 및 QE 우회 설치 스크립트
-│   ├── setup_pseudo.sh
-│   └── requirements.txt
-│
-├── 1_scf/                   ← 실습 1: SCF 계산
+```text
+EDISON/
+├── Tutorial.md
+├── 0_setup/
+│   ├── install_qe7.4.sh
+│   ├── requirements.txt
+│   └── setup_pseudo.sh
+├── 1_relax/
+│   ├── vc.in
+│   ├── re.in
+│   ├── run_op.sh
+│   ├── plot_qe_energy_force.py
+│   └── plot_qe_stress.py
+├── 2_scf/
 │   ├── scf.in
 │   ├── run_scf.sh
 │   └── plot_scf.py
-│
-├── 2_band/                  ← 실습 2: Band Structure
+├── 3_band/
 │   ├── bands.in
 │   ├── bands_pp.in
 │   ├── run_bands.sh
 │   └── plot_bands.py
-│
-└── 3_dos/                   ← 실습 3: DOS / PDOS
-    ├── nscf_dos.in
-    ├── dos.in
-    ├── pdos.in
-    ├── run_dos.sh
-    └── plot_dos.py
+├── 4_dos/
+│   ├── nscf_dos.in
+│   ├── dos.in
+│   ├── pdos.in
+│   ├── run_dos.sh
+│   └── plot_dos.py
+├── scf_U/
+│   ├── scf.in
+│   └── run_scf.sh
+└── band_U/
+    ├── bands.in
+    ├── bands_pp.in
+    ├── run_bands.sh
+    └── plot_bands_U_compare.py
 ```
-
-> ⚠️ **`pseudo/`와 `tmp/` 폴더는 프로젝트 루트에 위치하며 전 실습이 공유합니다.** 모든 입력 파일의 `pseudo_dir`과 `outdir`이 `'../pseudo/'`, `'../tmp/'`로 설정되어 있어, 각 실습 폴더에서 실행하면 자동으로 공유 경로를 참조합니다.
 
 ---
 
-## 0. 실습 자료 다운로드 및 환경 준비
+## 0. 사전 준비
 
-가장 먼저 실습에 필요한 모든 코드와 데이터를 GitHub에서 다운로드합니다.
-터미널을 열고 아래 명령어를 순서대로 입력하세요.
+실습 자료(GitHub 저장소) 다운로드
 
 ```bash
-# 1. 실습 자료(GitHub 저장소) 다운로드
 git clone https://github.com/ki-won-yang/test_QE.git
+```
 
-# 2. 다운로드한 실습 폴더로 이동 (매우 중요!)
+다운로드한 실습 폴더로 이동
+
+```bash
 cd test_QE
+```
 
-# 3. 파이썬 라이브러리 설치
+프로젝트 루트에서 필요한 Python 패키지와 pseudopotential을 준비합니다.
+
+```bash
 pip install -r 0_setup/requirements.txt
-
-# 4. 슈도포텐셜 다운로드 (pseudo/ 폴더에 저장됨)
 bash 0_setup/setup_pseudo.sh
 ```
 
-> ⚠️ **중요**: 슈도포텐셜 파일에 `PP_PSWFC` 블록이 포함되어야 실습 3의 PDOS 계산이 가능합니다. `setup_pseudo.sh`가 자동으로 검증합니다.
-
 ---
 
-## 1. QE 설치 (Conda 방식)
+## 1. QE 설치
 
-실습용 웹 서버 환경에 맞추어 Conda를 통해 Quantum ESPRESSO를 빠르고 안정적으로 설치합니다. (약 2~3분 소요) 복잡한 컴파일 과정이 생략됩니다.
+실습용 웹 서버 환경에서는 Conda로 Quantum ESPRESSO를 설치합니다.
 
 ```bash
 bash 0_setup/install_qe7.4.sh
 ```
 
-> ⚠️ **중요**: 설치가 완료되면 반드시 현재 터미널 창을 닫고, 메뉴에서 **Terminal > New Terminal**을 클릭해 '새 터미널'을 열어주세요. 새 터미널을 열면 어디서든 `pw.x`, `bands.x`, `dos.x`, `projwfc.x` 명령어를 바로 사용할 수 있습니다.
+설치 후 확인:
+
+```bash
+which pw.x
+which bands.x
+which dos.x
+```
+
+`pw.x`가 잡히지 않으면 현재 터미널에서 conda 환경을 활성화합니다.
+
+```bash
+source ~/miniconda3/bin/activate
+which pw.x
+```
 
 ---
 
-## 2. [실습 1] SCF 계산 — 바닥 상태 에너지 구하기
+## 2. [실습 1] 구조 최적화: `vc-relax` 후 `relax`
 
 ### 2.1 개요
 
-SCF(Self-Consistent Field) 계산은 전자 밀도와 퍼텐셜을 반복적으로 업데이트하여 시스템의 바닥 상태 에너지를 자기 모순 없이(self-consistently) 구합니다.
+구조 최적화는 원자 위치와 격자 구조를 에너지가 낮아지는 방향으로 조정하는 계산입니다. 여기서는 먼저 `vc-relax`로 unit cell과 원자 위치를 함께 최적화한 뒤, 최종 구조를 `re.in`에 반영하여 `relax` 계산을 한 번 더 수행합니다.
 
-### 2.2 입력 파일 (`1_scf/scf.in`)
+- `vc-relax`: 원자 위치와 unit cell을 함께 최적화
+- `relax`: unit cell은 고정하고 원자 위치만 최적화
+- `vc.out`의 final coordinates를 `re.in`에 자동 반영
 
-핵심 파라미터:
+### 2.2 입력 파일 (`vc.in`, `re.in`)
 
-- **`ecutwfc = 50.0`**: 파동함수의 평면파 차단 에너지 (Ry). 클수록 정확하지만 계산 비용이 증가합니다.
-- **`K_POINTS {automatic} 9 9 1`**: 브릴루앙 존 샘플링. 2D 물질이므로 z 방향은 1입니다.
-- **`occupations = 'smearing'`**: 금속/반금속 시스템에 적합한 점유 방식입니다.
+`vc.in`은 cell까지 움직이는 계산이므로 다음처럼 설정합니다.
+
+```fortran
+&control
+    calculation = 'vc-relax'
+/
+```
+
+`re.in`은 `vc-relax` 이후 얻은 최종 cell을 기준으로 원자 위치만 다시 안정화하는 계산입니다.
+
+```fortran
+&control
+    calculation = 'relax'
+/
+```
+
+두 입력 파일에서 공통으로 중요한 항목은 다음과 같습니다.
+
+- `prefix`: 계산 결과가 저장될 이름
+- `pseudo_dir`: pseudopotential 파일 위치
+- `outdir`: wavefunction과 charge density 저장 위치
+- `ecutwfc`: plane-wave cutoff energy
+- `K_POINTS`: Brillouin zone sampling
+- `CELL_PARAMETERS`: unit cell vector
+- `ATOMIC_POSITIONS`: 원자 좌표
 
 ### 2.3 실행
 
 ```bash
-cd 1_scf
+cd 1_relax
+bash run_op.sh
+```
+
+실행 흐름:
+
+```text
+vc.in -> vc.out
+vc.out final coordinates -> re.in 자동 업데이트
+re.in -> re.out
+```
+
+수렴 확인 plot:
+
+```bash
+python3 plot_qe_energy_force.py re.out
+python3 plot_qe_stress.py vc.out
+```
+
+생성되는 주요 그림:
+
+```text
+re.energy_force.png
+vc.stress.png
+```
+
+---
+
+## 3. [실습 2] SCF 계산
+
+### 3.1 개요
+
+SCF(Self-Consistent Field) 계산은 전자 밀도를 반복적으로 업데이트하여 self-consistent한 바닥 상태 전자 구조를 구하는 과정입니다.
+
+### 3.2 실행
+
+```bash
+cd 2_scf
 bash run_scf.sh
 python3 plot_scf.py
 ```
 
-`scf.out`에서 `convergence has been achieved in N iterations` 메시지를 확인하고, `scf_convergence.png`에서 수렴 그래프를 확인하세요.
+주요 결과:
+
+```text
+scf.out
+scf_convergence.png
+../tmp/
+```
+
+`scf.out`에서 다음 문구가 있으면 SCF가 정상 수렴한 것입니다.
+
+```text
+convergence has been achieved
+```
 
 ---
 
-## 3. [실습 2] Band Structure 계산 — 에너지 밴드 그리기
+## 4. [실습 3] Band Structure 계산
 
-### 3.1 개요
+### 4.1 개요
 
-Band structure는 전자의 에너지-운동량(E-k) 관계를 보여줍니다. Graphene의 K점에서 나타나는 **디랙 콘(Dirac cone)** — 선형으로 교차하는 밴드 — 은 제로갭 반금속의 핵심 시그니처입니다.
+Band structure 계산은 SCF에서 얻은 charge density를 이용해 고대칭 k-path를 따라 고유값을 계산하는 과정입니다.
 
-### 3.2 계산 흐름
+계산 흐름:
 
-SCF 전하 밀도를 고정한 채 고대칭 경로(Γ → M → K → Γ)를 따라 고유값만 구하는 non-self-consistent 계산입니다.
-
-```
-[1_scf 완료] → pw.x (calculation='bands') → bands.x (후처리) → Python (시각화)
+```text
+SCF 완료 -> pw.x calculation='bands' -> bands.x 후처리 -> Python plot
 ```
 
-### 3.3 입력 파일 (`2_band/bands.in`)
+### 4.2 실행
 
-SCF와 달라지는 부분:
-
-- **`calculation = 'bands'`**: 밴드 계산 모드
-- **`nbnd = 12`**: 비점유 밴드까지 포함 (점유 밴드 4개 + 비점유)
-- **`K_POINTS {crystal_b}`**: 고대칭 경로 (각 구간 30포인트)
-
-### 3.4 실행
+SCF 계산이 먼저 끝나 있어야 합니다.
 
 ```bash
-cd 2_band
+cd 3_band
 bash run_bands.sh
 python3 plot_bands.py
 ```
 
-> ⚠️ **SCF가 먼저 완료되어야 합니다.** `../tmp/graphene.save/`가 없으면 에러가 발생합니다.
+주요 결과:
 
-> 💡 **확인 포인트**: K점에서 밴드가 페르미 에너지 근처에서 **선형으로 교차**(디랙 콘)하는지 확인하세요.
+```text
+bands.out
+bands_pp.out
+*.dat.gnu
+band_structure.png
+```
 
 ---
 
-## 4. [실습 3] DOS / PDOS 계산 — 상태 밀도 분석
+## 5. [실습 4] DOS / PDOS 계산
 
-### 4.1 개요
+### 5.1 개요
 
-DOS(Density of States)는 에너지별 전자 상태의 밀도, PDOS(Projected DOS)는 이를 궤도별(s, p)로 분해한 것입니다.
+DOS(Density of States)는 에너지별 전자 상태 수를 나타내고, PDOS(Projected DOS)는 원자 또는 orbital별 기여도를 분해해서 보여줍니다.
 
-### 4.2 계산 흐름
+계산 흐름:
 
+```text
+SCF 완료 -> nscf 계산 -> dos.x / projwfc.x -> Python plot
 ```
-[1_scf 완료] → pw.x (nscf, 18×18×1) → dos.x (Total DOS)     → Python
-                                      → projwfc.x (PDOS)      → Python
-```
 
-### 4.3 입력 파일 (`3_dos/`)
-
-SCF와 달라지는 핵심:
-
-- **`calculation = 'nscf'`**: 전하 밀도 고정, 고유값만 재계산
-- **`occupations = 'tetrahedra'`**: DOS에 적합한 tetrahedron 방법 (SCF의 `smearing`과 다름)
-- **`K_POINTS 18 18 1`**: 2배 촘촘한 격자로 부드러운 DOS 확보
-
-### 4.4 실행
+### 5.2 실행
 
 ```bash
-cd 3_dos
+cd 4_dos
 bash run_dos.sh
 python3 plot_dos.py
 ```
 
-> 💡 **확인 포인트**:
-> - **Total DOS**: 페르미 에너지 근처 V자 형태 (vanishing DOS) → 디랙 콘의 특징
-> - **PDOS**: E_F 근처는 **C-p**(π 결합), 심층(−20 eV)은 **C-s**가 지배
-
 ---
 
-## 실행 순서 전체 요약
+## 6. Hubbard U 테스트
+
+`scf_U`와 `band_U` 폴더는 Hubbard U 값을 바꿔가며 SCF와 band structure를 비교하기 위한 예제입니다. 현재 설정은 MoS2 기준이며, Mo의 `4d` orbital에 U를 적용합니다.
+
+### 6.1 SCF U별 계산
 
 ```bash
-# 0. 환경 준비 (프로젝트 루트에서)
-pip install -r 0_setup/requirements.txt
-bash 0_setup/setup_pseudo.sh
+cd scf_U
+bash run_scf.sh
+```
 
-# 1. SCF
-cd 1_scf && bash run_scf.sh && python3 plot_scf.py && cd ..
+이 스크립트는 U 값을 바꿔가며 SCF를 네 번 실행합니다.
 
-# 2. Band Structure
-cd 2_band && bash run_bands.sh && python3 plot_bands.py && cd ..
+```text
+U = 0.0 eV -> ../tmp2/ -> scf_U0.0.out
+U = 1.5 eV -> ../tmp3/ -> scf_U1.5.out
+U = 3.0 eV -> ../tmp4/ -> scf_U3.0.out
+U = 4.5 eV -> ../tmp5/ -> scf_U4.5.out
+```
 
-# 3. DOS / PDOS
-cd 3_dos && bash run_dos.sh && python3 plot_dos.py && cd ..
+각 tmp 폴더 안에 wavefunction과 charge density가 저장됩니다.
+
+```text
+../tmp2/MoS2.save/
+../tmp3/MoS2.save/
+../tmp4/MoS2.save/
+../tmp5/MoS2.save/
+```
+
+### 6.2 Band 계산
+
+SCF가 끝난 뒤 상위 폴더로 돌아가서 `band_U` 폴더로 이동합니다.
+
+```bash
+cd ../band_U
+bash run_bands.sh
+```
+
+이 스크립트는 각 U에 대응하는 tmp 폴더를 읽어서 band 계산과 `bands.x` 후처리를 실행합니다.
+
+```text
+U = 0.0 eV -> ../tmp2/ -> MoS2_bands_U0.0.dat.gnu
+U = 1.5 eV -> ../tmp3/ -> MoS2_bands_U1.5.dat.gnu
+U = 3.0 eV -> ../tmp4/ -> MoS2_bands_U3.0.dat.gnu
+U = 4.5 eV -> ../tmp5/ -> MoS2_bands_U4.5.dat.gnu
+```
+
+### 6.3 Band 비교 plot
+
+같은 `band_U` 폴더에서 실행합니다.
+
+```bash
+python3 plot_bands_U_compare.py
+```
+
+결과 그림:
+
+```text
+MoS2_bands_U_compare.png
+```
+
+이 plot은 각 U별 SCF output에서 Fermi energy를 읽어서, 각각의 band energy를 아래처럼 정렬합니다.
+
+```text
+E_band(U) - E_F(U)
+```
+
+기본 plot 범위는 Fermi level 기준 `-2 ~ 2 eV`입니다. 범위를 바꾸고 싶으면 다음처럼 실행합니다.
+
+```bash
+python3 plot_bands_U_compare.py --emin -1 --emax 1
+```
+
+전체 U 테스트 루틴:
+
+```bash
+cd scf_U
+bash run_scf.sh
+
+cd ../band_U
+bash run_bands.sh
+python3 plot_bands_U_compare.py
 ```
 
 ---
 
-## ❓ 트러블슈팅
+## 전체 실행 순서 요약
 
-**Q. `xml data file ./tmp/graphene.save/data-file-schema.xml not found`**
-→ SCF를 먼저 실행하지 않았거나, 프로젝트 루트 밖에서 실행한 경우. 반드시 각 실습 폴더(`1_scf/`, `2_band/`, `3_dos/`) 안에서 스크립트를 실행하세요. `../tmp/`에 SCF 결과가 있어야 합니다.
+```bash
+# 0. 환경 준비
+pip install -r 0_setup/requirements.txt
+bash 0_setup/setup_pseudo.sh
 
-**Q. `pw.x: command not found`**
-→ QE 설치 후 새 터미널을 열지 않아서 Conda 환경(`(base)`)이 활성화되지 않은 경우입니다. 터미널 창을 닫고 다시 열어주세요.
-→ 또는 실행 스크립트(`run_xxx.sh`) 내부에 `/pw.x` 처럼 앞에 슬래시가 붙어있다면 슬래시를 지워주세요.
+# 1. 구조 최적화
+cd 1_relax
+bash run_op.sh
+python3 plot_qe_energy_force.py re.out
+python3 plot_qe_stress.py vc.out
+cd ..
 
-**Q. `Cannot project on zero atomic wavefunctions!` (projwfc.x)**
-→ 슈도포텐셜에 `PP_PSWFC` 블록이 없을 때 발생합니다. `grep "PP_PSWFC" pseudo/C_ONCV_PBE_sr.upf`로 확인하세요. 없다면 `bash 0_setup/setup_pseudo.sh`로 재다운로드 후 SCF부터 다시 돌려야 합니다.
+# 2. SCF
+cd 2_scf
+bash run_scf.sh
+python3 plot_scf.py
+cd ..
 
-**Q. 계산이 멈춘 것처럼 너무 오래 걸립니다.**
-→ 웹 서버의 MPI 통신 충돌입니다. 실습 스크립트 내부에 `export OMP_NUM_THREADS=1` 등의 설정이 정상적으로 들어있는지 확인하세요.
+# 3. Band
+cd 3_band
+bash run_bands.sh
+python3 plot_bands.py
+cd ..
 
-**Q. Band 그래프가 smooth하지 않다**
-→ `bands.in`의 K_POINTS 구간 포인트 수(기본 30)를 50~60으로 늘려보세요.
+# 4. DOS / PDOS
+cd 4_dos
+bash run_dos.sh
+python3 plot_dos.py
+cd ..
 
-**Q. DOS 그래프가 들쭉날쭉하다**
-→ `nscf_dos.in`의 k-grid를 `24 24 1` 또는 `36 36 1`로 늘리면 부드러워집니다.
+# 5. Hubbard U 테스트
+cd scf_U
+bash run_scf.sh
+cd ../band_U
+bash run_bands.sh
+python3 plot_bands_U_compare.py
+cd ..
+```
+
+---
+
+## 자주 발생하는 오류
+
+### `pw.x: command not found`
+
+QE가 설치되지 않았거나 conda 환경이 활성화되지 않은 경우입니다.
+
+```bash
+source ~/miniconda3/bin/activate
+which pw.x
+```
+
+그래도 잡히지 않으면 QE 설치를 다시 확인합니다.
+
+```bash
+bash 0_setup/install_qe7.4.sh
+```
+
+### `data-file-schema.xml not found`
+
+SCF 계산 결과가 없는 상태에서 band, DOS, U-band 계산을 실행한 경우입니다. 먼저 대응되는 SCF 계산을 실행해야 합니다.
+
+### `two consecutive same k`
+
+`bands.x` 후처리에서 같은 k-point가 연속으로 들어간 경우입니다. `K_POINTS crystal_b` 경로에서 중복된 연속 k-point를 제거해야 합니다.
+
+### `Unknown case for lda_plus_u_kind`
+
+`U = 0.0`인데 `HUBBARD` 카드를 넣은 경우 발생할 수 있습니다. U가 0인 경우에는 `HUBBARD` 카드를 빼고 일반 DFT 계산으로 실행합니다.
+
