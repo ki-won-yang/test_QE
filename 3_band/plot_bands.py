@@ -17,7 +17,7 @@ def get_fermi_energy(scf_output="../1_scf/scf.out"):
     return 0.0
 
 
-def plot_bands(datafile="graphene_bands.dat.gnu", scf_output="../1_scf/scf.out"):
+def plot_bands(datafile="graphene_bands.dat.gnu", scf_output="../2_scf/scf.out"):
     e_fermi = get_fermi_energy(scf_output)
     print(f"페르미 에너지: {e_fermi:.4f} eV")
 
