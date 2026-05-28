@@ -7,7 +7,7 @@ import numpy as np
 import re
 
 
-def get_fermi_energy(scf_output="../1_scf/scf.out"):
+def get_fermi_energy(scf_output="../2_scf/scf.out"):
     """scf.out에서 페르미 에너지(eV)를 추출합니다."""
     with open(scf_output, "r") as f:
         for line in f:
