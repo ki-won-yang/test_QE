@@ -60,10 +60,9 @@ git clone https://github.com/ki-won-yang/test_QE.git
 cd test_QE
 ```
 
-프로젝트 루트에서 필요한 Python 패키지와 pseudopotential을 준비합니다.
+프로젝트 루트에서 필요한 pseudopotential을 준비합니다.
 
 ```bash
-pip install -r 0_setup/requirements.txt
 bash 0_setup/setup_pseudo.sh
 ```
 
@@ -92,6 +91,11 @@ source ~/miniconda3/bin/activate
 which pw.x
 ```
 
+Python 패키지를 설치합니다.
+
+```bash
+pip install -r 0_setup/requirements.txt
+```
 ---
 
 ## 2. [실습 1] 구조 최적화: `vc-relax` 후 `relax`
