@@ -43,7 +43,7 @@ def plot_dos(dosfile="graphene_dos.dat", scf_output="../2_scf/scf.out"):
     print("이미지 저장 완료: dos_total.png")
 
 
-def plot_pdos(scf_output="../1_scf/scf.out"):
+def plot_pdos(scf_output="../2_scf/scf.out"):
     """PDOS를 궤도별(s, p)로 분리하여 그립니다."""
     e_fermi = get_fermi_energy(scf_output)
 
