@@ -8,7 +8,7 @@ import glob
 import re
 
 
-def get_fermi_energy(scf_output="../1_scf/scf.out"):
+def get_fermi_energy(scf_output="../2_scf/scf.out"):
     """scf.out에서 페르미 에너지(eV)를 추출합니다."""
     with open(scf_output, "r") as f:
         for line in f:
@@ -18,7 +18,7 @@ def get_fermi_energy(scf_output="../1_scf/scf.out"):
     return 0.0
 
 
-def plot_dos(dosfile="graphene_dos.dat", scf_output="../1_scf/scf.out"):
+def plot_dos(dosfile="graphene_dos.dat", scf_output="../2_scf/scf.out"):
     """Total DOS를 그립니다."""
     e_fermi = get_fermi_energy(scf_output)
 
