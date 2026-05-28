@@ -176,7 +176,7 @@ SCF(Self-Consistent Field) 계산은 전자 밀도를 반복적으로 업데이�
 ### 3.2 실행
 
 ```bash
-cd 2_scf
+cd ../2_scf
 bash run_scf.sh
 python3 plot_scf.py
 ```
@@ -214,7 +214,7 @@ SCF 완료 -> pw.x calculation='bands' -> bands.x 후처리 -> Python plot
 SCF 계산이 먼저 끝나 있어야 합니다.
 
 ```bash
-cd 3_band
+cd ../3_band
 bash run_bands.sh
 python3 plot_bands.py
 ```
@@ -245,7 +245,7 @@ SCF 완료 -> nscf 계산 -> dos.x / projwfc.x -> Python plot
 ### 5.2 실행
 
 ```bash
-cd 4_dos
+cd ../4_dos
 bash run_dos.sh
 python3 plot_dos.py
 ```
@@ -259,7 +259,7 @@ python3 plot_dos.py
 ### 6.1 SCF U별 계산
 
 ```bash
-cd scf_U
+cd ../scf_U
 bash run_scf.sh
 ```
 
