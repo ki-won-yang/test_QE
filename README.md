@@ -7,7 +7,7 @@
 
 ---
 
-## 📁 프로젝트 구조
+## 프로젝트 구조
 
 ```text
 QE/
@@ -53,7 +53,7 @@ QE/
     └── plot_bands_U_compare.py
 ```
 
-> ⚠️ **`pseudo/`와 `tmp*/` 폴더는 프로젝트 루트에서 공유됩니다.** 모든 입력 파일의 `pseudo_dir`과 `outdir`이 `'../pseudo/'`, `'../tmp/'`로 설정되어 있어, 각 실습 폴더에서 실행하면 자동으로 공유 경로를 참조합니다. (Hubbard U 실습은 U값별로 `tmp2~tmp5`를 사용)
+> **`pseudo/`와 `tmp*/` 폴더는 프로젝트 루트에서 공유됩니다.** 모든 입력 파일의 `pseudo_dir`과 `outdir`이 `'../pseudo/'`, `'../tmp/'`로 설정되어 있어, 각 실습 폴더에서 실행하면 자동으로 공유 경로를 참조합니다. (Hubbard U 실습은 U값별로 `tmp2~tmp5`를 사용)
 
 ---
 
@@ -74,7 +74,7 @@ cd ESEC2026/QE
 bash 0_setup/install_qe7.4.sh
 ```
 
-> ⚠️ **중요**: 설치 완료 후 반드시 터미널 창을 닫고 **새 터미널(New Terminal)**을 열어주세요. 그래야 `pw.x`, `bands.x`, `dos.x`, `projwfc.x` 명령어가 활성화됩니다.
+> **중요**: 설치 완료 후 반드시 터미널 창을 닫고 **새 터미널(New Terminal)**을 열어주세요. 그래야 `pw.x`, `bands.x`, `dos.x`, `projwfc.x` 명령어가 활성화됩니다.
 
 설치 확인:
 
@@ -172,7 +172,7 @@ SCF 완료 → pw.x (calculation='bands') → bands.x 후처리 → Python plot
 
 ### 3.2 실행
 
-> ⚠️ SCF(실습 2)가 먼저 완료되어 있어야 합니다.
+> SCF(실습 2)가 먼저 완료되어 있어야 합니다.
 
 ```bash
 cd ../3_band
@@ -243,7 +243,7 @@ python3 plot_bands_U_compare.py
 
 각 U값에 대응하는 `tmp` 폴더를 읽어 band 계산을 수행하고, 결과를 하나의 그래프에 겹쳐 그립니다. 각 band는 해당 U의 Fermi energy 기준으로 정렬됩니다. (`E_band(U) − E_F(U)`)
 
-> 💡 기본 plot 범위는 Fermi level 기준 −2 ~ 2 eV입니다. 범위 조정:
+> 기본 plot 범위는 Fermi level 기준 −2 ~ 2 eV입니다. 범위 조정:
 > ```bash
 > python3 plot_bands_U_compare.py --emin -1 --emax 1
 > ```
@@ -254,7 +254,7 @@ python3 plot_bands_U_compare.py
 
 ---
 
-## 🔁 전체 실행 순서 요약
+## 전체 실행 순서 요약
 
 ```bash
 # 0. 환경 준비
@@ -282,7 +282,7 @@ cd 5_band_U && bash run_bands.sh && python3 plot_bands_U_compare.py && cd ..
 
 ---
 
-## ❓ 자주 발생하는 오류
+## 자주 발생하는 오류
 
 **`pw.x: command not found`**
 → QE 설치 후 새 터미널을 열지 않아 conda 환경이 활성화되지 않은 경우입니다.
