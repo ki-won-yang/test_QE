@@ -263,21 +263,38 @@ bash 0_setup/setup_pseudo.sh
 pip install -r 0_setup/requirements.txt
 
 # 1. 구조 최적화 (Graphene)
-cd 1_relax && bash run_op.sh
-python3 plot_qe_energy_force.py re.out && python3 plot_qe_stress.py vc.out && cd ..
+cd 1_relax
+bash run_op.sh
+python3 plot_qe_energy_force.py re.out
+python3 plot_qe_stress.py vc.out
+cd ..
 
 # 2. SCF
-cd 2_scf && bash run_scf.sh && python3 plot_scf.py && cd ..
+cd 2_scf
+bash run_scf.sh
+python3 plot_scf.py
+cd ..
 
 # 3. Band
-cd 3_band && bash run_bands.sh && python3 plot_bands.py && cd ..
+cd 3_band
+bash run_bands.sh
+python3 plot_bands.py
+cd ..
 
 # 4. DOS / PDOS
-cd 4_dos && bash run_dos.sh && python3 plot_dos.py && cd ..
+cd 4_dos
+bash run_dos.sh
+python3 plot_dos.py
+cd ..
 
 # 5. Hubbard U 테스트 (MoS₂)
-cd 5_scf_U && bash run_scf.sh && cd ..
-cd 5_band_U && bash run_bands.sh && python3 plot_bands_U_compare.py && cd ..
+cd 5_scf_U
+bash run_scf.sh
+cd ..
+cd 5_band_U
+bash run_bands.sh
+python3 plot_bands_U_compare.py
+cd ..
 ```
 
 ---
