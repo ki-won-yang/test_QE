@@ -22,42 +22,42 @@ This document is a guide summarizing the process of performing **structural opti
 ```text
 QE/
 ├── README.md                ← The document you are currently reading[cite: 1]
-├── pseudo/                  ← [Shared] pseudopotential (Common for all practices)[cite: 1]
-│   ├── C_ONCV_PBE_sr.upf    (For Graphene)[cite: 1]
-│   ├── Mo.pbe-n-nc.UPF      (For MoS₂)[cite: 1]
-│   └── S.pbe-n-nc.UPF       (For MoS₂)[cite: 1]
+├── pseudo/                  ← [Shared] pseudopotential (Common for all practices)
+│   ├── C_ONCV_PBE_sr.upf    (For Graphene)
+│   ├── Mo.pbe-n-nc.UPF      (For MoS₂)
+│   └── S.pbe-n-nc.UPF       (For MoS₂)
 │
-├── 0_setup/                 ← Environment preparation[cite: 1]
+├── 0_setup/                 ← Environment preparation
 │   ├── install_qe7.4.sh
 │   ├── setup_pseudo.sh
 │   └── requirements.txt
 │
-├── 1_relax/                 ← [Practice 1] Structural optimization (vc-relax → relax)[cite: 1]
+├── 1_relax/                 ← [Practice 1] Structural optimization (vc-relax → relax)
 │   ├── vc.in / re.in
 │   ├── run_op.sh
 │   ├── plot_qe_energy_force.py
 │   └── plot_qe_stress.py
 │
-├── 2_scf/                   ← [Practice 2] SCF calculation[cite: 1]
+├── 2_scf/                   ← [Practice 2] SCF calculation
 │   ├── scf.in
 │   ├── run_scf.sh
 │   └── plot_scf.py
 │
-├── 3_band/                  ← [Practice 3] Band Structure[cite: 1]
+├── 3_band/                  ← [Practice 3] Band Structure
 │   ├── bands.in / bands_pp.in
 │   ├── run_bands.sh
 │   └── plot_bands.py
 │
-├── 4_dos/                   ← [Practice 4] DOS / PDOS[cite: 1]
+├── 4_dos/                   ← [Practice 4] DOS / PDOS
 │   ├── nscf_dos.in / dos.in / pdos.in
 │   ├── run_dos.sh
 │   └── plot_dos.py
 │
-├── 5_scf_U/                 ← [Practice 5-1] Hubbard U SCF (by U value)[cite: 1]
+├── 5_scf_U/                 ← [Practice 5-1] Hubbard U SCF (by U value)
 │   ├── scf.in
 │   └── run_scf.sh
 │
-└── 5_band_U/                ← [Practice 5-2] Hubbard U Band comparison[cite: 1]
+└── 5_band_U/                ← [Practice 5-2] Hubbard U Band comparison
     ├── bands.in / bands_pp.in
     ├── run_bands.sh
     └── plot_bands_U_compare.py
@@ -119,10 +119,10 @@ which pw.x
 
 
 ```bash
-# Check pseudopotential (Already included in the pseudo/ folder)[cite: 1]
+# Check pseudopotential (Already included in the pseudo/ folder)
 bash 0_setup/setup_pseudo.sh
 
-# Install Python packages[cite: 1]
+# Install Python packages
 pip install -r 0_setup/requirements.txt
 
 ```
@@ -162,7 +162,7 @@ bash run_op.sh
 Execution flow:
 
 ```text
-vc.in → vc.out → (Extract final coordinates) → re.in automatic update → re.out[cite: 1]
+vc.in → vc.out → (Extract final coordinates) → re.in automatic update → re.out
 
 ```
 
@@ -231,7 +231,7 @@ If the phrase `convergence has been achieved` is present in `scf.out`, it indica
 While keeping the charge density obtained from SCF fixed, eigenvalues are calculated along the high-symmetry k-path ($\Gamma \rightarrow \text{M} \rightarrow \text{K} \rightarrow \Gamma$).
 
 ```text
-SCF complete → pw.x (calculation='bands') → bands.x post-processing → Python plot[cite: 1]
+SCF complete → pw.x (calculation='bands') → bands.x post-processing → Python plot
 
 ```
 
@@ -271,7 +271,7 @@ python3 plot_bands.py
 DOS (Density of States) is the number of electron states per energy, and PDOS (Projected DOS) breaks this down by atom/orbital.
 
 ```text
-SCF complete → nscf calculation → dos.x / projwfc.x → Python plot[cite: 1]
+SCF complete → nscf calculation → dos.x / projwfc.x → Python plot
 
 ```
 
@@ -322,10 +322,10 @@ bash run_scf.sh
 This script runs the SCF calculation 4 times, changing the U value based on `scf.in`. (Automatically adds/removes the `HUBBARD` card).
 
 ```text
-U = 0.0 eV → ../tmp2/ → scf_U0.0.out   (U=0: Standard DFT without HUBBARD card)[cite: 1]
-U = 1.5 eV → ../tmp3/ → scf_U1.5.out[cite: 1]
-U = 3.0 eV → ../tmp4/ → scf_U3.0.out[cite: 1]
-U = 4.5 eV → ../tmp5/ → scf_U4.5.out[cite: 1]
+U = 0.0 eV → ../tmp2/ → scf_U0.0.out   (U=0: Standard DFT without HUBBARD card)
+U = 1.5 eV → ../tmp3/ → scf_U1.5.out
+U = 3.0 eV → ../tmp4/ → scf_U3.0.out
+U = 4.5 eV → ../tmp5/ → scf_U4.5.out
 
 ```
 
@@ -367,37 +367,37 @@ It reads the `tmp` folder corresponding to each U value, performs the band calcu
 
 
 ```bash
-# 0. Environment preparation[cite: 1]
-bash 0_setup/install_qe7.4.sh     # (New terminal after installation)[cite: 1]
+# 0. Environment preparation
+bash 0_setup/install_qe7.4.sh     # (New terminal after installation)
 bash 0_setup/setup_pseudo.sh
 pip install -r 0_setup/requirements.txt
 
-# 1. Structural optimization (Graphene)[cite: 1]
+# 1. Structural optimization (Graphene)
 cd 1_relax
 bash run_op.sh
 python3 plot_qe_energy_force.py re.out
 python3 plot_qe_stress.py vc.out
 cd ..
 
-# 2. SCF[cite: 1]
+# 2. SCF
 cd 2_scf
 bash run_scf.sh
 python3 plot_scf.py
 cd ..
 
-# 3. Band[cite: 1]
+# 3. Band
 cd 3_band
 bash run_bands.sh
 python3 plot_bands.py
 cd ..
 
-# 4. DOS / PDOS[cite: 1]
+# 4. DOS / PDOS
 cd 4_dos
 bash run_dos.sh
 python3 plot_dos.py
 cd ..
 
-# 5. Hubbard U Test (MoS₂)[cite: 1]
+# 5. Hubbard U Test (MoS₂)
 cd 5_scf_U
 bash run_scf.sh
 cd ..
@@ -444,7 +444,3 @@ $\rightarrow$ This happens when `U = 0.0` but the `HUBBARD` card is included. If
 
 
 $\rightarrow$ This occurs when the `PP_PSWFC` block is missing in the pseudopotential. Check the UPF file in the `pseudo/` folder.
-
-```
-
-```
