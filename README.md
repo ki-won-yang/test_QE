@@ -1,5 +1,3 @@
-Here is the English translation of the provided document.
-
 # Quantum ESPRESSO Practical Guide
 
 
