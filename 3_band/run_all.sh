@@ -1,0 +1,12 @@
+#!/bin/bash
+# [실습 3] 세 물질 Band (SCF 먼저 필요)
+set -uo pipefail
+export OMPI_MCA_pml=ob1; export OMPI_MCA_btl=self,tcp; export OMP_NUM_THREADS=1
+if ! command -v pw.x >/dev/null 2>&1 && [ -f "$HOME/miniconda3/bin/activate" ]; then
+    source "$HOME/miniconda3/bin/activate"; fi
+for MAT in graphene Al Si; do
+  echo "=== [$MAT] bands ==="
+  pw.x    < ${MAT}.bands.in    > ${MAT}.bands.out
+  bands.x < ${MAT}.bands_pp.in > ${MAT}.bands_pp.out
+done
+echo; echo "비교: python3 plot_compare.py"

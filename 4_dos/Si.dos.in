@@ -1,0 +1,6 @@
+&dos
+    prefix = 'Si'
+    outdir = '../tmp_Si/'
+    fildos = 'Si.dos'
+    DeltaE = 0.05
+/

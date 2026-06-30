@@ -1,0 +1,24 @@
+&control
+    calculation = 'nscf'
+    prefix = 'Al'
+    pseudo_dir = '../pseudo/'
+    outdir = '../tmp_Al/'
+/
+&system
+    ibrav = 0, nat = 1, ntyp = 1,
+    ecutwfc = 50.0,
+    occupations = 'tetrahedra'
+/
+&electrons
+    conv_thr = 1.0d-8
+/
+ATOMIC_SPECIES
+  Al  26.982  Al_ONCV_PBE_sr.upf
+CELL_PARAMETERS (angstrom)
+      0.000000     2.025000     2.025000
+      2.025000     0.000000     2.025000
+      2.025000     2.025000     0.000000
+ATOMIC_POSITIONS (crystal)
+  Al  0.000000  0.000000  0.000000
+K_POINTS {automatic}
+  24 24 24 0 0 0

@@ -1,0 +1,33 @@
+&control
+    calculation = 'vc-relax'
+    prefix = 'Al'
+    pseudo_dir = '../pseudo/'
+    outdir = '../tmp_Al/'
+    tstress = .true.
+    forc_conv_thr = 1.0d-8
+/
+&system
+    ibrav = 0, nat = 1, ntyp = 1,
+    ecutwfc = 50.0,
+    occupations = 'smearing', smearing = 'mp', degauss = 0.02
+/
+&electrons
+    conv_thr = 1.0d-8
+/
+&ions
+    ion_dynamics = 'damp'
+/
+&cell
+    press_conv_thr = 0.1
+    cell_dofree = 'all'
+/
+ATOMIC_SPECIES
+  Al  26.982  Al_ONCV_PBE_sr.upf
+CELL_PARAMETERS (angstrom)
+      0.000000     2.025000     2.025000
+      2.025000     0.000000     2.025000
+      2.025000     2.025000     0.000000
+ATOMIC_POSITIONS (crystal)
+  Al  0.000000  0.000000  0.000000
+K_POINTS {automatic}
+  12 12 12 0 0 0

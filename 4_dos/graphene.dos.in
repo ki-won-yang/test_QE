@@ -1,0 +1,6 @@
+&dos
+    prefix = 'graphene'
+    outdir = '../tmp_graphene/'
+    fildos = 'graphene.dos'
+    DeltaE = 0.05
+/

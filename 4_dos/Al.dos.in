@@ -1,0 +1,6 @@
+&dos
+    prefix = 'Al'
+    outdir = '../tmp_Al/'
+    fildos = 'Al.dos'
+    DeltaE = 0.05
+/
