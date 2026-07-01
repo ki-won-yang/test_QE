@@ -11,9 +11,9 @@
 
 | 물질 | 구조 | 분류 | 핵심 특징 | smearing |
 |------|------|------|-----------|----------|
-| **Al** | FCC | 금속 | E_F에서 DOS>0, band가 E_F 교차 | `mp` |
-| **Si** | diamond | 반도체 | E_F 주변 band gap (~0.6 eV, PBE) | `fixed` |
-| **Graphene** | hexagonal | 반금속 | E_F에서 DOS=0 (디랙 콘) | `gaussian` |
+| **Al** | FCC | 금속 | E<sub>F</sub>에서 DOS>0, band가 E<sub>F</sub> 교차 | `mp` |
+| **Si** | diamond | 반도체 | E<sub>F</sub> 주변 band gap (~0.6 eV, PBE) | `fixed` |
+| **Graphene** | hexagonal | 반금속 | E<sub>F</sub>에서 DOS=0 (디랙 콘) | `gaussian` |
 
 > **파일 규칙**: 각 단계 폴더에 `{물질}.{단계}.in` 형태로 입력이 있습니다 (예: `Al.scf.in`, `Si.bands.in`). `outdir`은 물질별로 `../tmp_graphene/`, `../tmp_Al/`, `../tmp_Si/`로 분리되어 단계 간(SCF→band/dos) 공유됩니다.
 
