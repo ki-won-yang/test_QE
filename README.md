@@ -260,7 +260,7 @@ bash run_bands.sh
 python3 plot_bands_U_compare.py
 ```
 
-각 U값에 대응하는 `tmp` 폴더를 읽어 band 계산을 수행하고, 결과를 하나의 그래프에 겹쳐 그립니다. 각 band는 해당 U의 Fermi energy 기준으로 정렬됩니다. (`E<sub>band</sub>(U) − E<sub>F</sub>(U)`)
+각 U값에 대응하는 `tmp` 폴더를 읽어 band 계산을 수행하고, 결과를 하나의 그래프에 겹쳐 그립니다. 각 band는 해당 U의 Fermi energy 기준으로 정렬됩니다. (`E_band(U) − E_F(U)`)
 
 > 기본 plot 범위는 Fermi level 기준 −2 ~ 2 eV입니다. 범위 조정:
 > ```bash
