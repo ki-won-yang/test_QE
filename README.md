@@ -202,7 +202,7 @@ python3 plot_compare.py  # → bands_compare.png
 
 ### 3.3 결과 해석
 
-- **`bands_compare.png`**: 세 물질의 E-k를 나란히 비교합니다. **Al은 여러 band가 E_F를 가로질러**(금속), **Si는 E_F 주변에 명확한 gap**(반도체), **Graphene은 K점에서 디랙 콘으로 한 점에서만 닿음**(반금속). 전도성의 차이가 band 구조에서 가장 극적으로 드러나는 그림입니다.
+- **`bands_compare.png`**: 세 물질의 E-k를 나란히 비교합니다. **Al은 여러 band가 E<sub>F</sub>를 가로질러**(금속), **Si는 E<sub>F</sub> 주변에 명확한 gap**(반도체), **Graphene은 K점에서 디랙 콘으로 한 점에서만 닿음**(반금속). 전도성의 차이가 band 구조에서 가장 극적으로 드러나는 그림입니다.
 
 ---
 
@@ -226,7 +226,7 @@ python3 plot_compare.py  # → dos_compare.png (전도성 비교의 핵심)
 
 ### 4.3 결과 해석
 
-- **`dos_compare.png`**: 위→아래로 Graphene·Al·Si의 DOS를 쌓아 보여줍니다. **E_F(점선)에서의 DOS 값이 전도성을 가르는 결정적 지표**입니다 — Al은 유한(금속), Si는 0인 갭(반도체), Graphene은 V자로 한 점에서 0에 닿음(반금속). PBE는 Si gap을 ~0.6 eV로 과소평가하는데(실험 1.1 eV), 이는 실습 5의 Hubbard U가 왜 필요한지로 자연스럽게 연결됩니다.
+- **`dos_compare.png`**: 위→아래로 Graphene·Al·Si의 DOS를 쌓아 보여줍니다. **E<sub>F</sub>(점선)에서의 DOS 값이 전도성을 가르는 결정적 지표**입니다 — Al은 유한(금속), Si는 0인 갭(반도체), Graphene은 V자로 한 점에서 0에 닿음(반금속). PBE는 Si gap을 ~0.6 eV로 과소평가하는데(실험 1.1 eV), 이는 실습 5의 Hubbard U가 왜 필요한지로 자연스럽게 연결됩니다.
 
 ---
 
@@ -260,7 +260,7 @@ bash run_bands.sh
 python3 plot_bands_U_compare.py
 ```
 
-각 U값에 대응하는 `tmp` 폴더를 읽어 band 계산을 수행하고, 결과를 하나의 그래프에 겹쳐 그립니다. 각 band는 해당 U의 Fermi energy 기준으로 정렬됩니다. (`E_band(U) − E_F(U)`)
+각 U값에 대응하는 `tmp` 폴더를 읽어 band 계산을 수행하고, 결과를 하나의 그래프에 겹쳐 그립니다. 각 band는 해당 U의 Fermi energy 기준으로 정렬됩니다. (`E<sub>band</sub>(U) − E<sub>F</sub>(U)`)
 
 > 기본 plot 범위는 Fermi level 기준 −2 ~ 2 eV입니다. 범위 조정:
 > ```bash
