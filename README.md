@@ -1,9 +1,9 @@
 # Quantum ESPRESSO 실습 가이드
 
-이 문서는 EDISON 여름학교 실습에서 Quantum ESPRESSO(QE)를 이용해 **구조 최적화 → SCF → Band Structure → DOS/PDOS → Hubbard U 비교**를 수행하는 과정을 정리한 가이드입니다.
+이 문서는 EDISON 여름학교 실습에서 Quantum ESPRESSO(QE)로 **구조 최적화 → SCF → Band Structure → DOS → Hubbard U 비교**를 수행하는 과정을 정리한 가이드입니다.
 
-- **실습 1~4 (Graphene · Al · Si 동시)**: 각 단계에서 **금속(Al) · 반도체(Si) · 반금속(Graphene)** 세 물질을 한 번에 돌려 전도성 차이를 직접 비교
-- **실습 5 (MoS₂)**: Hubbard U 값에 따른 band 구조 변화 비교
+- **실습 1~4 (Graphene · Al · Si 동시)**: 각 단계에서 **금속(Al) · 반도체(Si) · 반금속(Graphene)** 세 물질을 한 번에 돌려 전도성 차이를 직접 비교합니다.
+- **실습 5 (MoS₂)**: Hubbard U 값에 따른 band 구조 변화를 비교합니다.
 
 ### 핵심 설계: 물질 × 단계 매트릭스
 
@@ -26,6 +26,8 @@ QE/
 ├── README.md                ← 지금 보고 있는 문서
 ├── pseudo/                  ← [공유] pseudopotential (전 실습 공통)
 │   ├── C_ONCV_PBE_sr.upf    (Graphene용)
+│   ├── Al_ONCV_PBE_sr.upf   (Al용)
+│   ├── Si_ONCV_PBE_sr.upf   (Si용)
 │   ├── Mo.pbe-n-nc.UPF      (MoS₂용)
 │   └── S.pbe-n-nc.UPF       (MoS₂용)
 │
@@ -35,25 +37,27 @@ QE/
 │   └── requirements.txt
 │
 ├── 1_relax/                 ← [실습 1] 구조 최적화 (vc-relax → relax)
-│   ├── vc.in / re.in
-│   ├── run_op.sh
+│   ├── {graphene,Al,Si}.vc.in / {graphene,Al,Si}.re.in
+│   ├── run_all.sh           ← 세 물질 일괄 실행
+│   ├── update_re.py         ← vc-relax 최종 구조를 re.in에 반영
+│   ├── plot_compare.py      ← relax_compare.png
 │   ├── plot_qe_energy_force.py
 │   └── plot_qe_stress.py
 │
-├── 2_scf/                   ← [실습 2] SCF 계산
-│   ├── scf.in
-│   ├── run_scf.sh
-│   └── plot_scf.py
+├── 2_scf/                   ← [실습 2] SCF
+│   ├── {graphene,Al,Si}.scf.in
+│   ├── run_all.sh
+│   └── plot_compare.py      ← scf_compare.png
 │
 ├── 3_band/                  ← [실습 3] Band Structure
-│   ├── bands.in / bands_pp.in
-│   ├── run_bands.sh
-│   └── plot_bands.py
+│   ├── {graphene,Al,Si}.bands.in / {graphene,Al,Si}.bands_pp.in
+│   ├── run_all.sh
+│   └── plot_compare.py      ← bands_compare.png
 │
-├── 4_dos/                   ← [실습 4] DOS / PDOS
-│   ├── nscf_dos.in / dos.in / pdos.in
-│   ├── run_dos.sh
-│   └── plot_dos.py
+├── 4_dos/                   ← [실습 4] DOS
+│   ├── {graphene,Al,Si}.nscf.in / {graphene,Al,Si}.dos.in
+│   ├── run_all.sh
+│   └── plot_compare.py      ← dos_compare.png
 │
 ├── 5_scf_U/                 ← [실습 5-1] Hubbard U SCF (U값별)
 │   ├── scf.in
@@ -65,7 +69,7 @@ QE/
     └── plot_bands_U_compare.py
 ```
 
-> **`pseudo/`와 `tmp*/` 폴더는 프로젝트 루트에서 공유됩니다.** 모든 입력 파일의 `pseudo_dir`과 `outdir`이 `'../pseudo/'`, `'../tmp/'`로 설정되어 있어, 각 실습 폴더에서 실행하면 자동으로 공유 경로를 참조합니다. (Hubbard U 실습은 U값별로 `tmp2~tmp5`를 사용)
+> **`pseudo/` 폴더는 프로젝트 루트에서 공유됩니다.** 모든 입력 파일의 `pseudo_dir`이 `'../pseudo/'`로 설정되어 있어, 각 단계 폴더에서 실행하면 자동으로 공유 pseudopotential을 참조합니다. `outdir`은 물질별(`../tmp_graphene/`, `../tmp_Al/`, `../tmp_Si/`)로 분리되어 단계 간에 공유되므로, band/DOS가 SCF의 charge density를 읽을 수 있습니다.
 
 ---
 
@@ -119,9 +123,11 @@ pip install -r 0_setup/requirements.txt
 
 구조 최적화는 원자 위치와 격자를 에너지가 낮아지는 방향으로 조정하는 계산입니다. 먼저 `vc-relax`로 unit cell과 원자 위치를 함께 최적화한 뒤, 최종 구조를 기준으로 `relax`를 한 번 더 수행합니다.
 
-- **`vc-relax`** (`vc.in`): 원자 위치 + unit cell 동시 최적화
-- **`relax`** (`re.in`): unit cell 고정, 원자 위치만 최적화
-- `vc.out`의 final coordinates가 `re.in`에 자동 반영됩니다.
+- **`vc-relax`** (`{물질}.vc.in`): 원자 위치 + unit cell 동시 최적화
+- **`relax`** (`{물질}.re.in`): unit cell 고정, 원자 위치만 최적화
+- `*.vc.out`의 final coordinates가 `*.re.in`에 자동 반영됩니다 (`update_re.py`).
+
+> Graphene은 2D라 진공 방향을 고정하기 위해 `cell_dofree='xy'`, `nosym=.true.`를 사용하고, Al·Si는 3D라 전체 셀 최적화(`cell_dofree='all'`)를 사용합니다.
 
 ### 1.2 실행
 
@@ -131,23 +137,22 @@ bash run_all.sh          # graphene, Al, Si 순서로 vc-relax→relax
 python3 plot_compare.py  # → relax_compare.png (세 물질 수렴 비교)
 ```
 
-각 물질마다 실행 흐름:
+물질별 실행 흐름:
 
 ```text
-vc.in → vc.out → (final coordinates 추출) → re.in 자동 업데이트 → re.out
+*.vc.in → *.vc.out → (final coordinates 추출) → *.re.in 자동 업데이트 → *.re.out
 ```
 
-수렴 확인:
+단일 물질 수렴 확인(선택):
 
 ```bash
-python3 plot_qe_energy_force.py re.out   # → re.energy_force.png
-python3 plot_qe_stress.py vc.out         # → vc.stress.png
+python3 plot_qe_energy_force.py graphene.re.out   # → 에너지/force 수렴
+python3 plot_qe_stress.py graphene.vc.out         # → stress 수렴
 ```
 
 ### 1.3 결과 해석
 
-- **`re.energy_force.png`**: 최적화 step에 따라 total energy와 force가 감소하는 과정을 보여줍니다. Force가 0에 가까워지면 원자가 안정한 위치에 도달한 것입니다.
-- **`vc.stress.png`**: cell에 걸리는 stress가 감소하는 과정입니다. Stress가 0에 가까워지면 격자가 안정화된 것입니다.
+- **`relax_compare.png`**: 세 물질의 최적화 step에 따른 total energy입니다. Force가 0에 가까워지면 원자가 안정한 위치에 도달한 것입니다. Al·Si는 실험 격자상수가 잘 알려져 있어 거의 변하지 않는데, "최적화하니 실험값과 일치하더라"가 오히려 좋은 검증 메시지가 됩니다.
 
 ---
 
@@ -165,11 +170,11 @@ bash run_all.sh          # 세 물질 SCF
 python3 plot_compare.py  # → scf_compare.png
 ```
 
-`scf.out`에서 `convergence has been achieved` 문구가 있으면 정상 수렴입니다.
+`*.scf.out`에서 `convergence has been achieved` 문구가 있으면 정상 수렴입니다.
 
 ### 2.3 결과 해석
 
-- **`scf_convergence.png`**: SCF iteration에 따라 total energy가 수렴하는 과정을 보여줍니다. 에너지가 점차 감소하다가 평평해지면(수렴) 바닥 상태를 정확히 찾은 것입니다. 이 SCF 결과(charge density)가 이후 Band, DOS 계산의 기반이 됩니다.
+- **`scf_compare.png`**: SCF iteration에 따라 total energy가 수렴하는 과정입니다. 에너지가 점차 감소하다가 평평해지면(수렴) 바닥 상태를 정확히 찾은 것입니다. 이 SCF 결과(charge density)가 이후 Band, DOS 계산의 기반이 됩니다.
 
 ---
 
@@ -177,7 +182,7 @@ python3 plot_compare.py  # → scf_compare.png
 
 ### 3.1 개요
 
-SCF에서 얻은 charge density를 고정한 채, 고대칭 k-path(Γ → M → K → Γ)를 따라 고유값을 계산합니다.
+SCF에서 얻은 charge density를 고정한 채, 고대칭 k-path를 따라 고유값을 계산합니다. 결정 구조가 다르면 Brillouin zone도 다르므로 k-path는 물질마다 다릅니다.
 
 ```text
 SCF 완료 → pw.x (calculation='bands') → bands.x 후처리 → Python plot
@@ -201,14 +206,14 @@ python3 plot_compare.py  # → bands_compare.png
 
 ---
 
-## 4. [실습 4] DOS / PDOS 계산
+## 4. [실습 4] DOS 계산
 
 ### 4.1 개요
 
-DOS(Density of States)는 에너지별 전자 상태 수, PDOS(Projected DOS)는 이를 원자/orbital별로 분해한 것입니다.
+DOS(Density of States)는 에너지별 전자 상태 수입니다. 조밀한 NSCF k-grid 계산 후 `dos.x`로 구합니다.
 
 ```text
-SCF 완료 → nscf 계산 → dos.x / projwfc.x → Python plot
+SCF 완료 → nscf 계산 → dos.x → Python plot
 ```
 
 ### 4.2 실행
@@ -268,52 +273,6 @@ python3 plot_bands_U_compare.py
 
 ---
 
-
-## 6~8. [실습 6~8] 전도성 비교: 금속 vs 반도체 vs 반금속
-
-### 6~8.1 개요
-
-같은 워크플로우(SCF → NSCF → DOS)를 **전기적 성질이 다른 세 물질**에 적용해, DOS(상태밀도)가 어떻게 달라지는지 직접 비교합니다. 이 비교가 "전도성이 band 구조에서 어떻게 드러나는가"를 이해하는 핵심입니다.
-
-| 실습 | 물질 | 구조 | 분류 | 핵심 특징 |
-|------|------|------|------|-----------|
-| 6 | **Al** | FCC | 금속 (metal) | E_F에서 DOS > 0 (자유전자) |
-| 7 | **Si** | diamond | 반도체 (semiconductor) | E_F 주변에 band gap (~0.6 eV, PBE) |
-| 실습 4 | **Graphene** | honeycomb | 반금속 (semimetal) | E_F에서 DOS = 0 (점접촉, 디랙 콘) |
-
-> **smearing 차이에 주목**: 금속(Al)은 `occupations='smearing'`(또는 nscf에서 `tetrahedra`)으로 부분 점유를 처리하고, 반도체(Si)는 `occupations='fixed'`로 명확한 갭을 봅니다. 이 입력 차이 자체가 금속/반도체를 다루는 방법의 차이를 보여줍니다.
-
-### 6~8.2 실행
-
-```bash
-# 금속 Al
-cd 6_metal_Al
-bash run_scf.sh          # SCF → NSCF → DOS
-python3 plot_dos.py      # → dos_Al.png
-cd ..
-
-# 반도체 Si
-cd 7_semicon_Si
-bash run_scf.sh
-python3 plot_dos.py      # → dos_Si.png
-cd ..
-
-# 세 물질 한 그래프 비교 (실습 4의 graphene DOS도 필요)
-cd 8_compare_DOS
-python3 plot_compare.py  # → dos_comparison.png
-cd ..
-```
-
-> **주의**: 실습 8(비교)을 그리려면 실습 4(Graphene DOS)가 먼저 실행되어 `4_dos/graphene_dos.dat`이 있어야 합니다.
-
-### 6~8.3 결과 해석
-
-- **`dos_Al.png` (금속)**: Fermi level(E_F=0)에서 DOS가 **0이 아닌 유한한 값**을 가집니다. 이 "E_F에 존재하는 상태"가 금속의 전기 전도를 담당합니다. 자유전자 모델에 가까운 √E 형태의 매끄러운 DOS가 특징입니다.
-- **`dos_Si.png` (반도체)**: Fermi level 주변에 **DOS = 0인 구간(band gap)**이 뚜렷합니다. PBE 범함수는 Si gap을 ~0.6 eV로 과소평가합니다(실험값 1.1 eV) — 이는 실습 5의 Hubbard U/하이브리드 범함수가 왜 필요한지로 자연스럽게 연결됩니다.
-- **`dos_comparison.png` (3종 비교)**: 위→아래로 금속·반도체·반금속을 쌓아 보여줍니다. **E_F(점선)에서의 DOS 값**이 세 부류를 가르는 결정적 지표임을 한눈에 확인할 수 있습니다 — 금속은 유한, 반도체는 갭(0), 반금속은 점으로 0에 닿는(V자) 형태입니다.
-
----
-
 ## 전체 실행 순서 요약
 
 ```bash
@@ -335,18 +294,8 @@ cd 3_band && bash run_all.sh && python3 plot_compare.py && cd ..
 cd 4_dos && bash run_all.sh && python3 plot_compare.py && cd ..
 
 # 5. Hubbard U 테스트 (MoS₂)
-cd 5_scf_U
-bash run_scf.sh
-cd ..
-cd 5_band_U
-bash run_bands.sh
-python3 plot_bands_U_compare.py
-cd ..
-
-# 6~8. 전도성 비교 (금속 Al / 반도체 Si / 반금속 Graphene)
-cd 6_metal_Al && bash run_scf.sh && python3 plot_dos.py && cd ..
-cd 7_semicon_Si && bash run_scf.sh && python3 plot_dos.py && cd ..
-cd 8_compare_DOS && python3 plot_compare.py && cd ..
+cd 5_scf_U && bash run_scf.sh && cd ..
+cd 5_band_U && bash run_bands.sh && python3 plot_bands_U_compare.py && cd ..
 ```
 
 ---
