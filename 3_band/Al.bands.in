@@ -1,8 +1,8 @@
 &control
     calculation = 'bands'
     prefix = 'Al'
-    pseudo_dir = '../pseudo/'
-    outdir = '../tmp_Al/'
+    pseudo_dir = '/work/pseudo/'
+    outdir = '/work/tmp_Al/'
     verbosity = 'high'
 /
 &system

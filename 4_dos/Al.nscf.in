@@ -1,8 +1,8 @@
 &control
     calculation = 'nscf'
     prefix = 'Al'
-    pseudo_dir = '../pseudo/'
-    outdir = '../tmp_Al/'
+    pseudo_dir = '/work/pseudo/'
+    outdir = '/work/tmp_Al/'
 /
 &system
     ibrav = 0, nat = 1, ntyp = 1,
