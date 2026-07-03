@@ -1,8 +1,8 @@
 &control
     calculation = 'vc-relax'
     prefix = 'Si'
-    pseudo_dir = '/work/pseudo/'
-    outdir = '/work/tmp_Si/'
+    pseudo_dir = '../pseudo/'
+    outdir = '../tmp_Si/'
     tstress=.true.
     forc_conv_thr=1.0d-6
 /

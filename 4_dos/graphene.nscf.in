@@ -1,8 +1,8 @@
 &control
     calculation = 'nscf'
     prefix = 'graphene'
-    pseudo_dir = '/work/pseudo/'
-    outdir = '/work/tmp_graphene/'
+    pseudo_dir = '../pseudo/'
+    outdir = '../tmp_graphene/'
 /
 &system
     ibrav = 0, nat = 2, ntyp = 1,

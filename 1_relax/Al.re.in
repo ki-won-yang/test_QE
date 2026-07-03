@@ -1,8 +1,8 @@
 &control
     calculation = 'relax'
     prefix = 'Al'
-    pseudo_dir = '/work/pseudo/'
-    outdir = '/work/tmp_Al/'
+    pseudo_dir = '../pseudo/'
+    outdir = '../tmp_Al/'
     forc_conv_thr=1.0d-6
 /
 &system

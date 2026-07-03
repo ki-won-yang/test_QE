@@ -6,10 +6,12 @@
 
 # 제출 위치 = 단계 폴더 (예: .../QE/1_relax)
 STAGEDIR=${SLURM_SUBMIT_DIR:-$PWD}
-QEROOT="$STAGEDIR/.."          # QE/ 최상위
-STAGE=$(basename "$STAGEDIR")  # 예: 1_relax
+QEROOT="$(cd "$STAGEDIR/.." && pwd)"   # QE/ 최상위 절대경로
+STAGE="$(basename "$STAGEDIR")"
 
-# QE/ 전체를 /work로 바인드 → tmp_X가 단계 간 공유됨 (band가 scf 결과 읽기 가능)
+# QE/ 전체를 컨테이너의 /work로 바인드.
+# 단계 폴더(/work/$STAGE)에서 실행하므로 in파일의 ../pseudo, ../tmp_X 상대경로가
+# 마스터와 완전히 동일하게 작동함 (경로 수정 불필요).
 singularity exec \
   -B "$QEROOT:/work" \
   /singularity/quantum-mobile___1.0.0 \
@@ -20,12 +22,6 @@ singularity exec \
     export OMPI_MCA_oob=^ud
     export OMPI_MCA_btl_vader_single_copy_mechanism=none
     cd /work/$STAGE
-
-    for MAT in graphene Al Si; do
-      mkdir -p /work/tmp_\${MAT}
-      echo \"=== [\${MAT}] vc-relax ===\"
-      mpirun -np \${SLURM_NTASKS} pw.x < \${MAT}.vc.in > \${MAT}.vc.out
-      echo \"=== [\${MAT}] relax ===\"
-      mpirun -np \${SLURM_NTASKS} pw.x < \${MAT}.re.in > \${MAT}.re.out
-    done
+    export QE_MPIRUN='mpirun -np ${SLURM_NTASKS}'
+    bash run_all.sh
   "

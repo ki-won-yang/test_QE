@@ -1,6 +1,6 @@
 &dos
     prefix = 'Al'
-    outdir = '/work/tmp_Al/'
+    outdir = '../tmp_Al/'
     fildos = 'Al.dos'
     DeltaE = 0.05
 /
