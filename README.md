@@ -50,7 +50,7 @@ QE/
 │   ├── run_bands.sh
 │   └── plot_bands.py
 │
-├── 4_dos/                   ← [실습 4] DOS / PDOS
+├── 4_dos/                   ← [실습 4] DOS
 │   ├── nscf_dos.in / dos.in / pdos.in
 │   ├── run_dos.sh
 │   └── plot_dos.py
@@ -201,7 +201,7 @@ python3 plot_compare.py  # → bands_compare.png
 
 ---
 
-## 4. [실습 4] DOS / PDOS 계산
+## 4. [실습 4] DOS 계산
 
 ### 4.1 개요
 
@@ -269,51 +269,6 @@ python3 plot_bands_U_compare.py
 ---
 
 
-## 6~8. [실습 6~8] 전도성 비교: 금속 vs 반도체 vs 반금속
-
-### 6~8.1 개요
-
-같은 워크플로우(SCF → NSCF → DOS)를 **전기적 성질이 다른 세 물질**에 적용해, DOS(상태밀도)가 어떻게 달라지는지 직접 비교합니다. 이 비교가 "전도성이 band 구조에서 어떻게 드러나는가"를 이해하는 핵심입니다.
-
-| 실습 | 물질 | 구조 | 분류 | 핵심 특징 |
-|------|------|------|------|-----------|
-| 6 | **Al** | FCC | 금속 (metal) | E_F에서 DOS > 0 (자유전자) |
-| 7 | **Si** | diamond | 반도체 (semiconductor) | E_F 주변에 band gap (~0.6 eV, PBE) |
-| 실습 4 | **Graphene** | honeycomb | 반금속 (semimetal) | E_F에서 DOS = 0 (점접촉, 디랙 콘) |
-
-> **smearing 차이에 주목**: 금속(Al)은 `occupations='smearing'`(또는 nscf에서 `tetrahedra`)으로 부분 점유를 처리하고, 반도체(Si)는 `occupations='fixed'`로 명확한 갭을 봅니다. 이 입력 차이 자체가 금속/반도체를 다루는 방법의 차이를 보여줍니다.
-
-### 6~8.2 실행
-
-```bash
-# 금속 Al
-cd 6_metal_Al
-bash run_scf.sh          # SCF → NSCF → DOS
-python3 plot_dos.py      # → dos_Al.png
-cd ..
-
-# 반도체 Si
-cd 7_semicon_Si
-bash run_scf.sh
-python3 plot_dos.py      # → dos_Si.png
-cd ..
-
-# 세 물질 한 그래프 비교 (실습 4의 graphene DOS도 필요)
-cd 8_compare_DOS
-python3 plot_compare.py  # → dos_comparison.png
-cd ..
-```
-
-> **주의**: 실습 8(비교)을 그리려면 실습 4(Graphene DOS)가 먼저 실행되어 `4_dos/graphene_dos.dat`이 있어야 합니다.
-
-### 6~8.3 결과 해석
-
-- **`dos_Al.png` (금속)**: Fermi level(E_F=0)에서 DOS가 **0이 아닌 유한한 값**을 가집니다. 이 "E_F에 존재하는 상태"가 금속의 전기 전도를 담당합니다. 자유전자 모델에 가까운 √E 형태의 매끄러운 DOS가 특징입니다.
-- **`dos_Si.png` (반도체)**: Fermi level 주변에 **DOS = 0인 구간(band gap)**이 뚜렷합니다. PBE 범함수는 Si gap을 ~0.6 eV로 과소평가합니다(실험값 1.1 eV) — 이는 실습 5의 Hubbard U/하이브리드 범함수가 왜 필요한지로 자연스럽게 연결됩니다.
-- **`dos_comparison.png` (3종 비교)**: 위→아래로 금속·반도체·반금속을 쌓아 보여줍니다. **E_F(점선)에서의 DOS 값**이 세 부류를 가르는 결정적 지표임을 한눈에 확인할 수 있습니다 — 금속은 유한, 반도체는 갭(0), 반금속은 점으로 0에 닿는(V자) 형태입니다.
-
----
-
 ## 전체 실행 순서 요약
 
 ```bash
@@ -343,10 +298,6 @@ bash run_bands.sh
 python3 plot_bands_U_compare.py
 cd ..
 
-# 6~8. 전도성 비교 (금속 Al / 반도체 Si / 반금속 Graphene)
-cd 6_metal_Al && bash run_scf.sh && python3 plot_dos.py && cd ..
-cd 7_semicon_Si && bash run_scf.sh && python3 plot_dos.py && cd ..
-cd 8_compare_DOS && python3 plot_compare.py && cd ..
 ```
 
 ---
@@ -374,47 +325,30 @@ which pw.x
 
 ---
 
-## 계산 노드에서 실행 (Slurm + Singularity)
+---
 
-로그인(마스터) 노드에서는 `bash run_all.sh`로 바로 실행할 수 있습니다.
-계산 노드로 제출하려면 각 단계 폴더의 `submit.slurm`을 사용합니다.
+## (선택) 계산 노드에서 실행하기
 
-### 왜 Singularity인가
-마스터 노드와 계산 노드의 OS(glibc 버전)가 달라, 마스터에서 conda로 설치한
-QE를 계산 노드에서 직접 실행하면 `GLIBC_2.xx not found` 에러가 납니다.
-Singularity 컨테이너(`quantum-mobile`)는 자체 OS 환경을 들고 다니므로
-계산 노드 OS와 무관하게 동작합니다.
+기본 실습은 위처럼 마스터 노드에서 `bash run_all.sh`로 진행합니다.
+계산 노드(Slurm)로 돌리고 싶을 때만 각 단계 폴더의 `submit.slurm`을 씁니다.
 
-### 제출 방법
 ```bash
 cd 1_relax
-sbatch submit.slurm          # 큐에 제출
-squeue -u $USER              # 상태 확인
-cat qe_relax.*.out           # 로그 확인
+sbatch submit.slurm      # 큐에 제출
+squeue -u $USER          # 상태 확인 (R=실행, PD=대기)
 ```
 
-### 경로 규칙 (중요)
-- `submit.slurm`은 **QE/ 최상위 폴더를 컨테이너의 `/work`로 바인드**합니다.
-- 그래서 입력파일의 `pseudo_dir='/work/pseudo/'`, `outdir='/work/tmp_X/'`는
-  컨테이너 안 경로입니다. (호스트의 QE/pseudo, QE/tmp_X에 대응)
-- `outdir`을 `/work/tmp_X`로 공유하므로, band/dos 단계가 scf가 만든
-  charge density를 그대로 읽을 수 있습니다.
+- **왜 컨테이너?** 마스터와 계산 노드의 OS가 달라 QE를 직접 실행하면
+  `GLIBC not found` 에러가 납니다. `submit.slurm`은 Singularity 컨테이너
+  (`quantum-mobile`) 안에서 실행해 이 문제를 피합니다.
+- **입력파일은 그대로.** `.in`은 마스터 기준 상대경로(`../pseudo`, `../tmp_X`)
+  이고, 컨테이너가 QE/ 전체를 `/work`로 바인드하므로 수정 없이 그대로 돕니다.
+- **실습 팁:** 인원이 많으면 큐 대기로 흐름이 끊길 수 있어, 가벼운 셀은
+  마스터 인터랙티브가 더 매끄럽습니다. 노드 실행은 선택 사항입니다.
+- **5단계는 노드가 특히 유리:** Hubbard U는 U값 4개(0/1.5/3/4.5)를 반복
+  계산해 가장 무겁습니다. `5_scf_U`, `5_band_U`에도 `submit.slurm`이 있어
+  `sbatch`로 병렬 실행하면 시간이 크게 줄어듭니다. 단, **`5_band_U`는
+  `5_scf_U`가 먼저 끝나야** 합니다(tmp2~5의 charge density를 읽으므로).
 
-### 실행 순서
-relax/scf/band/dos 순서는 인터랙티브와 동일합니다.
-각 단계를 sbatch로 제출하고, 끝나면 `python3 plot_compare.py`로 그래프를 봅니다.
-
-> 참고: 실습 인원이 많으면 동시 제출로 큐 대기가 생길 수 있습니다.
-> 가벼운 셀은 마스터 노드 인터랙티브(`bash run_all.sh`)가 더 매끄럽습니다.
-
-### [실습 1] relax 초기 구조에 대하여
-교육 목적으로 relax 단계(`1_relax/*.vc.in`)의 초기 구조는 평형에서 살짝
-벗어나게 설정했습니다 (셀을 3~4% 늘리고, Si·graphene은 원자도 이동).
-그래서 최적화 과정(에너지·힘·stress가 줄어드는 모습)이 여러 스텝에 걸쳐
-관찰됩니다.
-- **Si**: 셀 +3% + 원자 흔들기 → stress·force 둘 다 수렴 과정 관찰
-- **graphene**: 셀 +3.6% + 원자 면내 이동 → xy 셀 + 원자 수렴
-- **Al**: 셀 +4% (원자 1개라 대칭상 이동 불가) → 셀 stress 수렴만
-  → "금속은 셀만, 반도체·반금속은 원자까지 움직인다"는 물질별 차이가 드러남
-
-scf/band/dos 단계의 입력은 평형 구조를 사용합니다 (과장 없음).
+> relax 초기 구조는 교육용으로 평형에서 살짝 벗어나게 설정해(셀 3~4% 확대 등),
+> 최적화 과정이 여러 스텝에 걸쳐 보이도록 했습니다. scf/band/dos는 평형 구조를 씁니다.

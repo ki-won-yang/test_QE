@@ -1,7 +1,8 @@
 #!/bin/bash
 # Run SCF calculations for multiple Hubbard U values.
-#SBATCH --partition=ice
 set -euo pipefail
+# 마스터: 빈 값(직렬) / 노드 slurm: mpirun -np N 주입
+QE_MPIRUN="${QE_MPIRUN:-}"
 
 # Practice environment settings
 export OMPI_MCA_pml=ob1
@@ -58,7 +59,7 @@ for idx in "${!U_VALUES[@]}"; do
     fi
 
     echo "Running SCF for U=${U_VALUE} eV -> ${OUTDIR}"
-    ${QE_BIN} < "${INPUT_FILE}" > "${OUTPUT_FILE}"
+    $QE_MPIRUN ${QE_BIN} < "${INPUT_FILE}" > "${OUTPUT_FILE}"
     echo "Done: ${OUTPUT_FILE}"
 done
 

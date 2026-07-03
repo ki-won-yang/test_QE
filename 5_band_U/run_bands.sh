@@ -1,7 +1,8 @@
 #!/bin/bash
 # Run band-structure calculations for SCF results with U = 0, 1, 2, 3 eV.
-#SBATCH --partition=ice
 set -euo pipefail
+# 마스터: 빈 값(직렬) / 노드 slurm: mpirun -np N 주입
+QE_MPIRUN="${QE_MPIRUN:-}"
 
 # Practice environment settings
 export OMPI_MCA_pml=ob1
@@ -142,7 +143,7 @@ EOF
     rm -f "${FILBAND}" "${GNU_FILE}" "${FILBAND}.rap"
 
     echo "[1/2] Running bands for U=${U_VALUE} eV -> ${OUTDIR}"
-    ${QE_BIN} < "${BAND_INPUT}" > "${BAND_OUTPUT}"
+    $QE_MPIRUN ${QE_BIN} < "${BAND_INPUT}" > "${BAND_OUTPUT}"
 
     if ! grep -q "End of band structure calculation" "${BAND_OUTPUT}"; then
         echo "Error: pw.x bands did not finish normally for U=${U_VALUE} eV."
@@ -151,7 +152,7 @@ EOF
     fi
 
     echo "[2/2] Running bands.x for U=${U_VALUE} eV"
-    ${BANDS_BIN} < "${BANDS_PP_INPUT}" > "${BANDS_PP_OUTPUT}"
+    $QE_MPIRUN ${BANDS_BIN} < "${BANDS_PP_INPUT}" > "${BANDS_PP_OUTPUT}"
 
     if [ ! -s "${GNU_FILE}" ]; then
         echo "Error: ${GNU_FILE} is missing or empty."
